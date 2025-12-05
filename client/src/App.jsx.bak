@@ -1,0 +1,202 @@
+import React, { useState } from 'react';
+import axios from 'axios';
+import Sidebar from './components/Sidebar';
+import Header from './components/Header';
+import DataCard from './components/DataCard';
+import ControlPanel from './components/ControlPanel';
+import Visualization from './components/Visualization';
+import AlertBanner from './components/AlertBanner';
+import Footer from './components/Footer';
+
+const API_URL = 'http://localhost:5000/api/predict';
+
+function App() {
+  // Use a string input for a single feature for this prototype
+  const [feature1, setFeature1] = useState(5.1); // Iris data feature 1 value
+  const [result, setResult] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [trafficCount, setTrafficCount] = useState(1245);
+  const [totalAlerts, setTotalAlerts] = useState(15);
+
+  const predictTraffic = async () => {
+    setLoading(true);
+    setResult(null);
+    setTrafficCount(prev => prev + 1); // Increment traffic count for visual effect
+
+    // The 4 features expected by the Iris ML model
+    const featuresToSend = [
+      parseFloat(feature1), // Feature 1 is the user-controlled input
+      5.1,                   // Feature 2
+      1.4,                   // Feature 3
+      0.2                    // Feature 4
+    ];
+
+    try {
+      const response = await axios.post(API_URL, { features: featuresToSend });
+      setResult(response.data);
+      if (response.data.status === 'ALERT') {
+          setTotalAlerts(prev => prev + 1); // Increment alert count
+      }
+    } catch (error) {
+      console.error('Prediction failed:', error.response ? error.response.data : error.message);
+      setResult({ status: 'ERROR', message: 'API communication error.' });
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  // High-contrast color mapping for security status
+  const ALERT_COLOR_MAP = {
+      'ALERT': 'text-red-400',
+      'NORMAL': 'text-green-400',
+      'ERROR': 'text-yellow-400',
+      'UNKNOWN': 'text-gray-400'
+  };
+
+  const currentStatus = result ? result.status : 'UNKNOWN';
+  const alertColor = ALERT_COLOR_MAP[currentStatus];
+
+  return (
+    // DARK MODE container for professional look
+    <div className="min-h-screen bg-gray-900 text-white font-sans">
+      
+      {/* --- Sidebar (Navigation/Info Panel) --- */}
+      <div className="fixed top-0 left-0 h-full w-56 bg-gray-950 p-6 shadow-2xl z-10">
+        <h1 className="text-2xl font-extrabold text-blue-400 border-b border-gray-700 pb-3 mb-6">
+          <span className='text-red-500'>IDS</span> Monitor
+        </h1>
+        <nav className="space-y-4 text-sm">
+          <a href="#" className="flex items-center space-x-2 text-blue-400 font-semibold p-2 rounded bg-gray-800">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M3 14h18m-9-4v8m-7 4h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            <span>Dashboard</span>
+          </a>
+          <a href="#" className="flex items-center space-x-2 text-gray-400 hover:text-blue-300 p-2 rounded">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+            <span>Attack Logs</span>
+          </a>
+          <a href="#" className="flex items-center space-x-2 text-gray-400 hover:text-blue-300 p-2 rounded">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.06-.03.11-.05.17-.08z"></path></svg>
+            <span>Settings</span>
+          </a>
+        </nav>
+      </div>
+
+      {/* --- Main Content Area --- */}
+      <div className="ml-56 p-8">
+        <header className="flex justify-between items-center pb-4 border-b border-gray-800 mb-6">
+          <h2 className="text-3xl font-light text-gray-300">
+            Real-Time Network Monitoring
+          </h2>
+          <div className="text-sm text-gray-500">
+            Status: <span className={`${currentStatus === 'ALERT' ? 'text-red-500 font-bold' : 'text-green-500'}`}>{new Date().toLocaleTimeString()}</span>
+          </div>
+        </header>
+
+        {/* --- Critical Alert Panel (Prioritized Information) --- */}
+        {result && currentStatus !== 'NORMAL' && (
+            <div className={`flex items-center p-4 mb-8 rounded-lg shadow-2xl ${currentStatus === 'ALERT' ? 'bg-red-900 border-l-4 border-red-500' : 'bg-yellow-900 border-l-4 border-yellow-500'}`}>
+                <svg className={`w-8 h-8 mr-3 ${alertColor}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.3 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                <div>
+                    <h4 className="text-xl font-bold">{result.status}: {result.attack_type}</h4>
+                    <p className="text-sm text-gray-300">Confidence: {(result.confidence * 100).toFixed(1)}% | Take immediate action to block source IP.</p>
+                </div>
+            </div>
+        )}
+        
+        {/* --- Top Metrics Row (KPIs) --- */}
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-6 mb-8">
+          <DataCard title="Total Traffic Flows" value={trafficCount} unit="count" color="text-blue-400" />
+          <DataCard title="Alerts This Session" value={totalAlerts} unit="alerts" color="text-red-400" />
+          <DataCard title="Classification Status" value={currentStatus} unit="" color={alertColor} />
+          <DataCard title="Network Latency" value="12" unit="ms" color="text-green-400" />
+        </div>
+        
+        {/* --- Main Content Grid (Visualization and Control) --- */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          {/* --- [A] Prediction/Control Panel (Simulated Input) --- */}
+          <div className="lg:col-span-1 bg-gray-800 p-6 rounded-xl shadow-lg border-2 border-gray-700">
+            <h3 className="text-lg font-semibold mb-4 text-gray-300 border-b border-gray-700 pb-2">
+              🔬 ML Feature Simulation
+            </h3>
+            
+            {/* Input Control */}
+            <div className="mb-6">
+              <label className="block text-gray-400 font-medium mb-2" htmlFor="feature1">
+                Feature 1 Value (e.g., Connection Duration)
+              </label>
+              <input
+                id="feature1"
+                type="number"
+                step="0.1"
+                value={feature1}
+                onChange={(e) => setFeature1(e.target.value)}
+                className="bg-gray-700 text-white p-3 rounded-lg w-full focus:ring-blue-500 focus:border-blue-500 border border-gray-600"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Test values: 5.0 (Normal), 6.0 (Probe), 7.0 (DDoS - depends on training data)
+              </p>
+            </div>
+            
+            {/* Prediction Button */}
+            <button
+              onClick={predictTraffic}
+              disabled={loading}
+              className={`w-full py-3 px-4 rounded-lg font-bold transition duration-300 flex items-center justify-center ${
+                loading ? 'bg-blue-600/50' : 'bg-blue-600 hover:bg-blue-700 text-white'
+              }`}
+            >
+              {loading ? (
+                <>
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    Analyzing Flow...
+                </>
+              ) : (
+                'Classify Network Flow'
+              )}
+            </button>
+          </div>
+
+          {/* --- [B] Visualization Area (Real-time Charts) --- */}
+          <div className="lg:col-span-2 bg-gray-800 p-6 rounded-xl shadow-lg border-2 border-gray-700">
+            <h3 className="text-lg font-semibold mb-4 text-gray-300 border-b border-gray-700 pb-2">
+              🌐 Attack & Traffic Visualization
+            </h3>
+            
+            {/* Placeholder for real-time chart (e.g., Line Chart: Traffic over Time) */}
+            <div className="h-64 bg-gray-700/50 p-4 rounded-lg flex items-center justify-center text-gray-500 mb-6">
+                
+            </div>
+
+            {/* Placeholder for secondary visualization (e.g., Pie Chart: Attack Type Distribution) */}
+             <div className="grid grid-cols-2 gap-4">
+                <div className="bg-gray-700/50 p-4 rounded-lg flex items-center justify-center text-gray-500 h-32">
+                  Attack Type Distribution (Chart Placeholder)
+                </div>
+                <div className="bg-gray-700/50 p-4 rounded-lg flex items-center justify-center text-gray-500 h-32">
+                  Top Attacking IPs (List Placeholder)
+                </div>
+            </div>
+          </div>
+        </div>
+
+        {/* --- Footer/Log Display --- */}
+        <div className="mt-8 pt-6 border-t border-gray-800">
+            <h3 className="text-lg font-semibold mb-2 text-gray-300">
+                Latest Prediction Log
+            </h3>
+            <div className={`p-4 rounded-lg ${currentStatus === 'ALERT' ? 'bg-red-900/40 text-red-300' : 'bg-green-900/40 text-green-300'} text-sm`}>
+                {result ? (
+                    `[${new Date().toLocaleTimeString()}] Status: ${result.status} | Type: ${result.attack_type} | Confidence: ${(result.confidence * 100).toFixed(1)}%`
+                ) : (
+                    'Waiting for first classification...'
+                )}
+            </div>
+        </div>
+        
+      </div>
+    </div>
+  );
+}
+
+export default App;
