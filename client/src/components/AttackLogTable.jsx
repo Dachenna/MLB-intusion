@@ -25,7 +25,7 @@ const AttackLogTable = React.memo(({ logs }) => {
   };
 
   return (
-    <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-2xl shadow-lg border border-gray-700 mt-8">
+    <div className="bg-linear-to-br from-gray-800 to-gray-900 p-6 rounded-2xl shadow-lg border border-gray-700 mt-8">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-gray-100">📋 Attack Log History</h3>
         <div className="flex gap-2">
