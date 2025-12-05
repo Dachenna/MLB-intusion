@@ -1,0 +1,26 @@
+# Server
+server/node_modules/
+server/npm-debug.log*
+server/yarn-debug.log*
+server/yarn-error.log*
+server/package-lock.json
+server/yarn.lock
+server/.env
+server/.env.local
+server/.env.*.local
+server/__pycache__/
+server/*.py[cod]
+server/*.pyo
+server/*.pyd
+server/venv/
+server/env/
+server/venv*/
+server/ENV/
+server/.ipynb_checkpoints
+server/models/
+server/*.h5
+server/*.pt
+server/*.pth
+server/*.ckpt
+server/logs/
+server/*.log

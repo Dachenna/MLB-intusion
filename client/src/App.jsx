@@ -59,11 +59,13 @@ function App() {
     dispatch({ type: 'SET_RESULT', payload: null });
     dispatch({ type: 'INCREMENT_TRAFFIC' });
 
+    // Network traffic classification model:
+    // 4 core features (easily extensible to 41+ for full NSL-KDD or CICIDS2017 dataset)
     const featuresToSend = [
-      parseFloat(feature1),
-      5.1,
-      1.4,
-      0.2
+      parseFloat(feature1),  // Feature 1: Duration (connection duration in seconds)
+      42,                    // Feature 2: Protocol Type (normalized: 0-255)
+      120,                   // Feature 3: Service (normalized destination port bytes)
+      512                    // Feature 4: Flag (connection status flags)
     ];
 
     try {

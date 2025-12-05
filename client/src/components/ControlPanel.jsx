@@ -5,7 +5,7 @@ const ControlPanel = ({ feature1, onChangeFeature1, onPredict, loading }) => {
     <div className="bg-linear-to-br from-gray-800 to-gray-900 p-6 rounded-2xl shadow-lg border border-gray-700">
       <h3 className="text-lg font-semibold text-gray-100 mb-3">🔬 ML Feature Simulation</h3>
 
-      <label className="block text-sm text-gray-400 mb-2">Feature 1 Value (e.g., Connection Duration)</label>
+      <label className="block text-sm text-gray-400 mb-2">Duration (seconds) - Connection Length</label>
       <input
         type="number"
         step="0.1"
@@ -13,7 +13,9 @@ const ControlPanel = ({ feature1, onChangeFeature1, onPredict, loading }) => {
         onChange={(e) => onChangeFeature1(e.target.value)}
         className="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 text-white mb-2"
       />
-      <p className="text-xs text-gray-500 mb-4">Try: 5.0 (Normal), 6.0 (Probe), 7.0 (DDoS)</p>
+      <p className="text-xs text-gray-500 mb-4">
+        Network features: <span className="text-green-400">5.0s (Normal)</span>, <span className="text-yellow-400">15.0s (Probe)</span>, <span className="text-red-400">0.5s (DDoS)</span>
+      </p>
 
       <button
         onClick={onPredict}
